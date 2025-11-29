@@ -95,6 +95,15 @@ export default function StartupRegistration() {
       }
 
       try {
+        // Prepare document metadata
+        const documentsMetadata = uploadedDocs.map(doc => ({
+          name: doc.name,
+          type: doc.type,
+          size: doc.size,
+          // Note: Actual file upload would require FormData and backend file handling
+          // For now, we're sending metadata. File paths would be set after backend upload.
+        }));
+
         const response = await axios.post('http://localhost:5001/api/startup/register', {
           founderName: formData.founderName,
           startupName: formData.startupName,
@@ -109,7 +118,8 @@ export default function StartupRegistration() {
           description: formData.description,
           password: formData.password,
           confirmPassword: formData.confirmPassword,
-          digiLockerVerified: verificationProgress === 100
+          digiLockerVerified: verificationProgress === 100,
+          documents: documentsMetadata
         });
 
         if (response.status === 201) {

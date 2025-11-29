@@ -28,7 +28,8 @@ router.post('/register', async (req, res) => {
       description,
       password,
       confirmPassword,
-      digiLockerVerified
+      digiLockerVerified,
+      documents
     } = req.body;
 
     // Validation
@@ -67,7 +68,8 @@ router.post('/register', async (req, res) => {
       description,
       password,
       digiLockerVerified: digiLockerVerified || false,
-      verificationStatus: 'pending'
+      verificationStatus: 'pending',
+      documents: documents || []
     });
 
     await startup.save();

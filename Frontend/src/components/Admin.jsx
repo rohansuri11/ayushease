@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { 
-  CheckCircle, XCircle, Eye, LogOut, Users, Clock, CheckSquare, XSquare,
-  FileText, Bell, TrendingUp, AlertCircle
+import {
+  CheckCircle,
+  XCircle,
+  Eye,
+  LogOut,
+  Users,
+  Clock,
+  CheckSquare,
+  XSquare,
+  FileText,
+  Bell,
+  AlertCircle,
+  Download
 } from 'lucide-react';
 
 export default function Admin() {
@@ -13,20 +23,20 @@ export default function Admin() {
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   // Dashboard data
   const [stats, setStats] = useState(null);
   const [pendingStartups, setPendingStartups] = useState([]);
   const [selectedStartup, setSelectedStartup] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [actionType, setActionType] = useState(''); // 'approve' or 'reject'
+  const [actionType, setActionType] = useState('');
   const [comments, setComments] = useState('');
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     const adminData = localStorage.getItem('admin');
-    
+
     if (token && adminData) {
       setIsLoggedIn(true);
       setAdmin(JSON.parse(adminData));
@@ -63,7 +73,7 @@ export default function Admin() {
 
     try {
       const response = await axios.post('http://localhost:5001/api/admin/login', loginData);
-      
+
       if (response.status === 200) {
         localStorage.setItem('adminToken', response.data.token);
         localStorage.setItem('admin', JSON.stringify(response.data.admin));
@@ -84,6 +94,14 @@ export default function Admin() {
     setIsLoggedIn(false);
     setAdmin(null);
     navigate('/');
+  };
+
+  const formatFileSize = (bytes) => {
+    if (!bytes || bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   };
 
   const handleViewStartup = async (startupId) => {
@@ -151,9 +169,7 @@ export default function Admin() {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Email
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
               <input
                 type="email"
                 value={loginData.email}
@@ -164,9 +180,7 @@ export default function Admin() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Password
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
               <input
                 type="password"
                 value={loginData.password}
@@ -177,9 +191,7 @@ export default function Admin() {
             </div>
 
             {errorMsg && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                {errorMsg}
-              </div>
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">{errorMsg}</div>
             )}
 
             <button
@@ -440,6 +452,53 @@ export default function Admin() {
                       <p className="font-semibold">{selectedStartup.description}</p>
                     </div>
                   </div>
+
+                  {/* Documents Section */}
+                  {selectedStartup.documents && selectedStartup.documents.length > 0 ? (
+                    <div className="pt-4 border-t">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <FileText className="text-blue-600" size={20} />
+                        Uploaded Documents ({selectedStartup.documents.length})
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {selectedStartup.documents.map((doc, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200"
+                          >
+                            <div className="flex items-center gap-3">
+                              <FileText className="text-blue-600" size={20} />
+                              <div>
+                                <p className="font-medium text-sm text-gray-900">{doc.name || `Document ${index + 1}`}</p>
+                                <p className="text-xs text-gray-500">
+                                  {doc.type || 'Unknown type'} • {doc.size ? formatFileSize(doc.size) : 'Size unknown'}
+                                </p>
+                              </div>
+                            </div>
+                            {doc.path && (
+                              <a
+                                href={doc.path}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Download document"
+                              >
+                                <Download size={18} />
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="pt-4 border-t">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <FileText className="text-gray-400" size={20} />
+                        Uploaded Documents
+                      </h3>
+                      <p className="text-gray-500 text-sm">No documents uploaded yet.</p>
+                    </div>
+                  )}
 
                   <div className="flex gap-4 pt-4 border-t">
                     <button

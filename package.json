@@ -1,5 +1,17 @@
 {
+  "name": "ayushease",
+  "version": "1.0.0",
+  "description": "AYUSHEASE Platform - Full Stack Application",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd Backend && npm run dev",
+    "dev:frontend": "cd Frontend && npm run dev",
+    "install:all": "npm install && cd Backend && npm install && cd ../Frontend && npm install"
+  },
   "dependencies": {
     "@lottiefiles/react-lottie-player": "^3.6.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }
